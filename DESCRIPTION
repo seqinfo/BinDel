@@ -1,0 +1,41 @@
+Package: bindel
+Title: BINDEL
+Version: 2.5.1
+Authors@R: c(
+  person(
+    given = "Priit", 
+    family = "Paluoja", 
+    role = c("aut", "cre"),
+    email = "priitpaluoja@gmail.com",
+    comment = c(ORCID = "0000-0002-2016-661X")),
+  person(
+    given = "Priit",
+    family = "Palta",
+    role = c("aut"),
+    email = "priit.palta@gmail.com",
+    comment = c(ORCID = "0000-0001-9320-7008")))
+Description: The package focuses on the detection of rare (occurring in five or fewer people in 10,000) clinically relevant pathogenic microdeletions from low-coverage NIPT WGS data. 
+License: CC BY-NC-SA 4.0
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+Depends:
+    R (>= 4.1.1)
+biocViews:
+Imports:
+  Biostrings (>= 2.62.0),
+  BSgenome.Hsapiens.UCSC.hg38 (>= 1.4.4),
+  dplyr (>= 1.0.7),
+  GenomicAlignments (>= 1.30.0),
+  GenomicRanges (>= 1.46.1),
+  ggplot2 (>= 3.3.5),
+  IRanges (>= 2.28.0),
+  magrittr (>= 2.0.1),
+  purrr (>= 0.3.4),
+  readr (>= 2.1.1),
+  Rsamtools (>= 2.10.0),
+  stats (>= 4.1.1),
+  stringr (>= 1.4.0),
+  tidyr (>= 1.1.4),
+  utils (>= 4.1.1)
