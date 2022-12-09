@@ -13,7 +13,7 @@ Our [paper](https://doi.org/10.1101/2022.09.20.22280152) describes the BinDel al
 
 
 ## Installation
-
+#### Docker: [![Docker Repository on Quay](https://quay.io/repository/priitpaluoja/bindel/status "Docker Repository on Quay")](https://quay.io/repository/priitpaluoja/bindel)
 <details><summary>Installation on Ubuntu 22.04</summary>
 <p>
  
