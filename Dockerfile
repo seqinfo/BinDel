@@ -7,6 +7,8 @@ RUN  apt-get update \
   && wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc \
   && add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/" \
   && apt-get install -y --no-install-recommends \
+    libcairo2-dev \
+    libxt-dev \
     r-base \
     r-cran-devtools \
     r-bioc-biostrings \
