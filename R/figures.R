@@ -5,20 +5,19 @@
 
 #' Creates and saves binned normalized Z-Score figure per region.
 #'
-#' @importFrom magrittr %>%
 #' @param data A binned Z-scored data frame with columns \emph{focus}, \emph{start},
 #'  \emph{PPDX_norm}, \emph{sample} and \emph{reference}.
 #' @param sample_name sample name of interest
-save_bin_plot <- function(samples, sample_name) {
+#' @param file_name_prefix name of the file to write
+save_bin_plot <- function(samples, sample_name, file_name_prefix) {
   capt <-
     paste(
-      "Supplementary bin figure complementing the final result",
-      "figure. Each subregion depicts the bins from the region of interest",
+      "Supplementary bin figure. Each subregion depicts the bins from the region of interest",
       "and their deviation from the reference group."
     )
   
   ggplot2::ggsave(
-    paste0(sample_name, ".bins", ".png"),
+    paste0(file_name_prefix, ".png"),
     ggplot2::ggplot(
       samples,
       ggplot2::aes(
@@ -68,9 +67,7 @@ save_bin_plot <- function(samples, sample_name) {
       )
     ,
     width = 10,
-    height = max(1, round(length(
-      unique(samples$focus)
-    ) / 2)) * 2
+    height = max(1, round(length(unique(samples$focus)) / 2)) * 2
   )
 }
 

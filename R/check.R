@@ -3,20 +3,16 @@
 # Contact: priit.palta@gmail.com
 
 
-#' Sanity check for the reference data frame (after initial read in).
+#' Check reference data frame for consistency
+#' 
+#' This function checks the reference data frame for consistency, ensuring that it has the
+#' expected columns, the sample size is not zero, and the number of PCA components is appropriate.
 #'
-#' Checks if:
-#' 1. required column names are present.
-#' 2. reference sample size is not 0.
-#' 3. number of PCA components suit with reference sample size.
-#'
-#' @importFrom magrittr %>%
 #' @param reference A data frame holding reference set
-#' @param use_pca Is PCA-normalization switched on?
-#' @param nComp How many PCA components are used?
-check_reference <- function(reference, use_pca, nComp) {
-  ref_expected_cols <-
-    c("chr", "start", "end", "focus", "reads", "sample")
+#' @param use_pca  Should PCA normalization be used?
+#' @param num_comp The number of PCA components to use?
+check_reference <- function(reference, use_pca, num_comp) {
+  ref_expected_cols <- c("chr", "start", "end", "focus", "reads", "sample")
   
   for (col in ref_expected_cols) {
     if (!col %in% colnames(reference)) {
@@ -24,8 +20,8 @@ check_reference <- function(reference, use_pca, nComp) {
     }
   }
   
-  ref_size <- nrow(reference %>%
-                     dplyr::select(sample) %>%
+  ref_size <- nrow(reference |>
+                     dplyr::select(sample) |>
                      dplyr::distinct(sample))
   
   if (nrow(reference) == 0) {
@@ -39,8 +35,10 @@ check_reference <- function(reference, use_pca, nComp) {
   }
   
   
-  if (use_pca & (ref_size < nComp)) {
-    stop("nComp (", nComp, ") > reference sample size (", ref_size, ").")
+  if (use_pca & (!is.null(num_comp))) {
+    if(ref_size < num_comp){
+      stop("Number of PCA components (", num_comp, ") cannot be greater than reference sample size (", ref_size, ").")
+    }
   }
 }
 
@@ -50,15 +48,14 @@ check_reference <- function(reference, use_pca, nComp) {
 #' This check is important as otherwise using group_by in the metrics
 #' calculations will lead to incorrect calculations.
 #'
-#' @importFrom magrittr %>%
 #' @param binned_reads binned BAM
 #' @param reference A data frame holding reference set
 check_uniq <- function(binned_reads, reference) {
   similar_names_in_ref <- nrow(
-    binned_reads %>%
-      dplyr::select(sample) %>%
-      dplyr::distinct(sample) %>%
-      dplyr::inner_join(reference %>% dplyr::select(sample))
+    binned_reads |>
+      dplyr::select(sample) |>
+      dplyr::distinct(sample) |>
+      dplyr::inner_join(reference |> dplyr::select(sample))
   )
   
   if (similar_names_in_ref != 0) {

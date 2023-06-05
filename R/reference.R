@@ -3,64 +3,72 @@
 # Contact: priit.palta@gmail.com
 
 
-#' Create a reference file.
+#' Create a BinDel reference
 #'
-#' Takes a location to the folder with .bam files and .bed file and bins the
-#' .bam files with GRCh38. 
-#' 
-#' Outputs .tsv reference file with columns:
-#' \enumerate{
-#' \item \emph{chr}
-#' \item \emph{start}
-#' \item \emph{end}
-#' \item \emph{focus}
-#' \item \emph{reads}
-#' \item \emph{sample}
-#'}
-#' @param bam_locations The path to the folder, where the reference files exists.
-#' @param bed_location A location to the .bed file with columns: \emph{chr}, \emph{start}, \emph{end}, \emph{focus}.
-#' @param reference_name The name of the output file. File must not exist.
+#' This function creates a BinDel reference from a set of input BAM files and a coordinates file.
+#'
+#' Note: The function assumes that the input BAM files and the coordinates file have already been prepared and are available for use in the function.
+#'
+#' @param bam_locations A vector of file paths to BAM files that will be used to generate the reference.
+#' @param coordinates_file A file path to the coordinates file. The file should contain the following columns: \emph{chr}, \emph{start}, \emph{end}, \emph{focus}, \emph{length}.
+#' @param output_name The name of the output reference file. If the file extension \code{.gz} is appended to the name, the resulting file will be compressed.
+#' @param col_names A logical value that specifies whether to include column names in the output file.
+#' @param anonymise A logical value that specifies whether to include the original sample name in the reference file. If \code{TRUE}, the sample names are replaced with a \code{prefix + integer}.
+#' @param prefix A character string that is used as a prefix when anonymising the sample names.
 #'
 #' @export
-create_reference <-
+#' @examples
+#' write_reference(c("sample1.bam", "sample2.bam", "sample3.bam"), "locations.info.tsv", "reference.gz")
+#' write_reference(c("sample.bam"), "locations.info.tsv", "reference.tsv", col_names = FALSE)
+write_reference <-
   function(bam_locations,
-           bed_location,
-           reference_name) {
-    files <- list.files(
-      path = bam_locations,
-      pattern = "*.bam",
-      full.names = TRUE,
-      recursive = FALSE
-    )
+           coordinates_file,
+           output_name,
+           col_names = TRUE,
+           anonymise = TRUE,
+           prefix = "S") {
+    message("Creating BinDel reference.")
     
-    if (length(files) == 0) {
+    if (length(bam_locations) == 0) {
       stop("No .bam files found in '", bam_locations, "'.")
     }
     
-    if (!file.exists(bed_location)) {
-      stop(".bed file not found in '", bed_location, "'.")
+    if (!file.exists(coordinates_file)) {
+      stop("Coordinates file not found in '", coordinates_file, "'.")
     }
     
-    if (file.exists(reference_name)) {
-      stop("Output '", reference_name, "' already exists.")
+    if (file.exists(output_name)) {
+      stop("Reference already exists, aborting.")
     }
     
-    bed <- readr::read_tsv(bed_location)
+    bed <- divide_bins(coordinates_file)
+    
+    if (col_names) {
+      df_cols <- c("chr", "start", "end", "focus", "reads", "sample")
+      empty_df <-
+        data.frame(matrix(ncol = length(df_cols), nrow = 0))
+      colnames(empty_df) <- df_cols
+      readr::write_tsv(x = empty_df, output_name)
+    }
     
     
-    df_cols <- c("chr", "start", "end", "focus", "reads", "sample")
-    empty_df <- data.frame(matrix(ncol = length(df_cols), nrow = 0))
-    colnames(empty_df) <- df_cols
-    readr::write_tsv(x = empty_df, reference_name)
-    
-    
-    lapply(files, function(x) {
+    i <- 1
+    lapply(bam_locations, function(x) {
       message("Processing '", x, "'.")
+      
+      binned <- bin_bam(x, bed)
+      
+      if (anonymise) {
+        binned <- binned |>
+          dplyr::mutate(sample = paste0(prefix, i))
+        i <<- i + 1
+      }
+      
       readr::write_tsv(
-        file = reference_name,
-        x = bin_bam(x, bed),
+        file = output_name,
+        x = binned,
         append = TRUE,
-        col_names = FALSE
+        col_names = F
       )
     })
   }

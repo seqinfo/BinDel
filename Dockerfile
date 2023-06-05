@@ -13,6 +13,7 @@ RUN  apt-get update \
     r-cran-devtools \
     r-bioc-biostrings \
     r-cran-dplyr \
+    r-cran-factoextra \
     r-bioc-genomicalignments \
     r-bioc-genomicranges \
     r-cran-ggplot2 \
@@ -29,4 +30,3 @@ RUN  apt-get update \
   && apt remove -y wget gpg software-properties-common r-cran-devtools git \
   && apt-get autoremove -y \
   && apt-get clean -y
-

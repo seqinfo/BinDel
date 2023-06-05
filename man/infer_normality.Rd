@@ -2,31 +2,58 @@
 % Please edit documentation in R/bindel.R
 \name{infer_normality}
 \alias{infer_normality}
-\title{Infer sample high-risk probability.}
+\title{Infer sample high-risk probability based on a reference set.}
 \usage{
 infer_normality(
-  bam_location,
-  reference_location,
+  bam_file_path,
+  ref_file_path,
   use_pca = TRUE,
-  nComp = 80,
-  bin_plot = TRUE,
-  save_bins = FALSE
+  cumulative_variance = 95,
+  num_comp = NULL,
+  create_bin_plot = FALSE,
+  save_bins = FALSE,
+  output_file_path = NULL,
+  internally_deidentify_reference = TRUE,
+  output_reference_scores = FALSE,
+  write_probabilities_dataframe = TRUE,
+  output_intermediate_scores = FALSE,
+  score_file_extension = ".scores",
+  bin_file_extension = ".bins"
 )
 }
 \arguments{
-\item{bam_location}{Path to the input file.}
+\item{bam_file_path}{A character string specifying the path to the BAM file containing the samples to be analyzed.}
 
-\item{reference_location}{Path to the reference file.}
+\item{ref_file_path}{A character string specifying the path to the reference file.}
 
-\item{use_pca}{Use PCA based normalization? Increases sensitivity by reducing variation between samples.}
+\item{use_pca}{A logical value indicating whether to use PCA-based normalization. If \code{TRUE}, PCA-based normalization will be used, otherwise not.}
 
-\item{nComp}{How many components to use in PCA-based normalization? Cannot be higher than the number of samples in the reference set. It affects the minimum read count and the fetal fraction that the tool can reliably operate on.}
+\item{cumulative_variance}{A numeric value specifying the cumulative percentage of variance to be retained by the number of PCA components in the normalization (based on the reference set). The default value is \code{95.0}.}
 
-\item{bin_plot}{Create and save detailed bin plots?}
+\item{num_comp}{An integer specifying the number of PCA components to use for normalization. If \code{cumulative_variance} is not specified, this value will be used instead. The default value is \code{NULL}.}
 
-\item{save_bins}{Save bins?}
+\item{create_bin_plot}{A logical value indicating whether to create and save detailed bin plot. If \code{TRUE}, detailed bin plots will be created and saved, otherwise not. The default value is \code{FALSE}.}
+
+\item{save_bins}{A logical value indicating whether to save the bins. If \code{TRUE}, the bins will be saved to file, otherwise not. The default value is \code{FALSE}.}
+
+\item{output_file_path}{Set file name (path) for output.}
+
+\item{internally_deidentify_reference}{A logical value indicating whether to rename the reference samples to avoid naming conflicts with the analyzable samples during computations. If \code{TRUE}, reference samples will be internally renamed, otherwise not. The default value is \code{TRUE}}
+
+\item{output_reference_scores}{A logical value indicating whether to output the high-risk probabilities for the reference set during computations. If \code{TRUE}, the high-risk probabilities for the reference set will be outputted, otherwise not. The default value is \code{FALSE}}
+
+\item{write_probabilities_dataframe}{A logical value indicating whether to also write the high-risk probabilities to a file. If \code{TRUE}, the high-risk probabilities will be written to file. The default value is \code{TRUE}}
+
+\item{output_intermediate_scores}{A logical value indicating whether to output all intermediate scores used for calculating probabilities. If \code{TRUE}, all intermediate scores will be outputted, otherwise not. The default value is \code{FALSE}}
+
+\item{score_file_extension}{Specify the desired file extension for the output score file.}
+
+\item{bin_file_extension}{Specify the desired file extension for the output bin file.}
 }
 \description{
+Note: The function assumes that the reference set has already been processed and is available for use in the calculations.
+}
+\details{
 This function does the following:
 \enumerate{
 \item Apply bin-based GC\% correct.
@@ -35,16 +62,10 @@ This function does the following:
 \item Apply PCA-based normalization
 \item Calculate reference group statistics per focus region.
 \item Calculate sample Mahalanobis distance from the reference group.
-\item Calculate -log10 chi-squared distribution probabilities.
+\item Calculate \code{-log10} chi-squared distribution probabilities.
 }
-}
-\details{
-Outputs results to different files.
 }
 \examples{
+infer_normality("sample.bam", "reference.gz")
 
-bam <- "sample.bam"
-reference <- "reference.tsv"
-infer_normality(bam, reference)
-head("sample.bam.tsv")
 }

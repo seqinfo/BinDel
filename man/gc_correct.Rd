@@ -2,7 +2,7 @@
 % Please edit documentation in R/normalise.R
 \name{gc_correct}
 \alias{gc_correct}
-\title{GC\% bin-correct}
+\title{Correct GC\% bias in bins}
 \usage{
 gc_correct(samples)
 }

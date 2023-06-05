@@ -2,22 +2,18 @@
 % Please edit documentation in R/check.R
 \name{check_reference}
 \alias{check_reference}
-\title{Sanity check for the reference data frame (after initial read in).}
+\title{Check reference data frame for consistency}
 \usage{
-check_reference(reference, use_pca, nComp)
+check_reference(reference, use_pca, num_comp)
 }
 \arguments{
 \item{reference}{A data frame holding reference set}
 
-\item{use_pca}{Is PCA-normalization switched on?}
+\item{use_pca}{Should PCA normalization be used?}
 
-\item{nComp}{How many PCA components are used?}
+\item{num_comp}{The number of PCA components to use?}
 }
 \description{
-Checks if:
-\enumerate{
-\item required column names are present.
-\item reference sample size is not 0.
-\item number of PCA components suit with reference sample size.
-}
+This function checks the reference data frame for consistency, ensuring that it has the
+expected columns, the sample size is not zero, and the number of PCA components is appropriate.
 }
