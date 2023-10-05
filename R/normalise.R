@@ -83,6 +83,8 @@ pca_correct <- function(samples, num_comp, cumulative_variance) {
     dplyr::arrange(reference)
   
   # Pivot wide for PCA normalization
+  message(head(samples %>%  dplyr::select(focus) %>% dplyr::distinct()))
+  
   wider <- samples |>
     dplyr::select(focus, start, sample, reference, gc_corrected) |>
     tidyr::pivot_wider(
@@ -98,8 +100,9 @@ pca_correct <- function(samples, num_comp, cumulative_variance) {
     dplyr::select(-reference,-sample)
   
   mu <- colMeans(ref, na.rm = T)
-  refPca <- stats::prcomp(ref)
   
+  refPca <- stats::prcomp(ref)
+
   if(is.null(num_comp)){
     num_comp <- (factoextra::get_eig(refPca) |> 
                 dplyr::mutate(PCA = dplyr::row_number()) |> 
@@ -137,5 +140,8 @@ pca_correct <- function(samples, num_comp, cumulative_variance) {
   normalized$sample <- samples$sample
   normalized$reference <- samples$reference
   normalized$chr <- samples$chr
+  
+  # Replace NAs with 0.
+  normalized$gc_corrected[is.na(normalized$gc_corrected)] <- 0
   return(normalized)
 }

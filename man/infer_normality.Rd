@@ -8,8 +8,11 @@ infer_normality(
   bam_file_path,
   ref_file_path,
   use_pca = TRUE,
+  use_pca_per_region = FALSE,
   cumulative_variance = 95,
+  cumulative_variance_per_region = 50,
   num_comp = NULL,
+  num_comp_per_region = NULL,
   create_bin_plot = FALSE,
   save_bins = FALSE,
   output_file_path = NULL,
@@ -28,9 +31,15 @@ infer_normality(
 
 \item{use_pca}{A logical value indicating whether to use PCA-based normalization. If \code{TRUE}, PCA-based normalization will be used, otherwise not.}
 
+\item{use_pca_per_region}{A logical value indicating whether to use PCA-based normalization per region.}
+
 \item{cumulative_variance}{A numeric value specifying the cumulative percentage of variance to be retained by the number of PCA components in the normalization (based on the reference set). The default value is \code{95.0}.}
 
+\item{cumulative_variance_per_region}{A numeric value specifying the cumulative percentage of variance to be retained by the number of PCA components in the per region normalization. The default value is \code{50.0}.}
+
 \item{num_comp}{An integer specifying the number of PCA components to use for normalization. If \code{cumulative_variance} is not specified, this value will be used instead. The default value is \code{NULL}.}
+
+\item{num_comp_per_region}{An integer specifying the number of PCA components to use for normalization per region. If \code{cumulative_variance_per_region} is not specified, this value will be used instead. The default value is \code{NULL}.}
 
 \item{create_bin_plot}{A logical value indicating whether to create and save detailed bin plot. If \code{TRUE}, detailed bin plots will be created and saved, otherwise not. The default value is \code{FALSE}.}
 
