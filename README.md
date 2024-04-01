@@ -63,7 +63,9 @@ BinDel requires `.bam` **GRCh38** alignment files which are **sorted** and **dup
 ## Usage
 ### Reference creation
 BinDel requires the creation of a reference set file. A reference set file is a file that contains known euploid NIPT samples. The read counts of these samples are used to compare the sample of interest with the healthy reference group. The creation of the reference file requires known euploid NIPT samples in `.bam` format and
-a [coordinates file](example/locations.info.tsv) describing bin lengths and region of interests.
+a [coordinates file](example/locations.info.tsv) describing bin lengths and regions of interest. 
+
+A reference file with at least 200 samples is recommended to analyse regular WGS NIPT. The reference sample set size is not constrained, but PCA-based normalisation yields more accurate analysis when an increased number of euploid fetus samples are used as a reference.
 
 ```R
 # In R:
@@ -75,3 +77,10 @@ BinDel::write_reference(c("sample1.bam", "sample2.bam"), "coordinates.tsv", "ref
 # In R:
 BinDel::infer_normality("sample.bam", "reference.gz")
 ```
+Note that `infer_normality` with small reference set size and high cumulative PCA settings (regional, `use_pca_per_region = T` and `cumulative_variance_per_region = 50`) may lead to `NA` microdeletion risk scores (omitted from the output) or the inability to call microdeletion risk accurately.
+
+Based on the [preprint](https://www.medrxiv.org/content/10.1101/2022.09.20.22280152v2.full-text), the recommended analysis approach would be adopting a microdeletion-region-specific cut-off threshold when NIPT samples featuring microdeletions are available for calibration. This calibration should encompass parameters such as `cumulative_variance`, `use_pca_per_region`, `cumulative_variance_per_region`, and the cut-off threshold, tailored to align with the application’s specific requirements, ensuring a balance between sensitivity and specificity that aligns with the intended analysis purposes.
+### Interpreting output
+Results location: The output file name and location are determined by the function `infer_normality` named parameter `output_file_path` (presumes that the folder exists) and `score_file_extension`. Based on our analysis, we recommend using the column `conservative_prob` from the resulting output file for standard WGS NIPT to estimate microdeletion risk. 
+
+The `conservative_prob` is a probability of microdeletion risk with a risk score between 0-100, where 100 represents the highest risk. In non-standard NIPT analysis (exploratory or novel method development), one might benefit from using `dist_conservative` Mahalanobis distance (set `output_intermediate_scores = T`), which is not capped at 100 but requires distribution analysis to determine where to set high microdeletion cut-off. Please note that the risk score interpretation may vary between different NIPT WGS protocols.
