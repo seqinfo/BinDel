@@ -72,6 +72,24 @@ A reference file with at least 200 samples is recommended to analyse regular WGS
 BinDel::write_reference(c("sample1.bam", "sample2.bam"), "coordinates.tsv", "reference.gz")
 ```
 
+In addition to generating a single reference file in tab-separated text format, it's possible to create individual reference files per sample and subsequently merge them. This approach can be advantageous in scenarios involving high-performance computing (HPC) workflows or when memory constraints are a concern.
+
+For instance, one can create a reference with the first sample as follows:
+```R
+# In R
+BinDel::write_reference(c("sample1.bam"), "coordinates.tsv", "reference_with_header.gz")
+```
+For subsequent sample(s), the reference can be generated without including the column names/header:
+```R
+# In R
+BinDel::write_reference(c("sample2.bam"), "coordinates.tsv", "reference_no_header.gz", col_names = FALSE)
+```
+Finally, to consolidate the reference files, they can be merged using the following command (in bash):
+
+```bash
+cat reference_with_header reference_no_header.gz > reference.gz
+```
+
 ### Running BinDel
 ```R
 # In R:
