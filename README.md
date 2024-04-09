@@ -77,12 +77,12 @@ In addition to generating a single reference file in tab-separated text format, 
 For instance, one can create a reference with the first sample as follows:
 ```R
 # In R
-BinDel::write_reference(c("sample1.bam"), "coordinates.tsv", "reference_with_header.gz")
+BinDel::write_reference(c("sample1.bam"), "coordinates.tsv", "reference_with_header.gz", anonymise=F)
 ```
 For subsequent sample(s), the reference can be generated without including the column names/header:
 ```R
 # In R
-BinDel::write_reference(c("sample2.bam"), "coordinates.tsv", "reference_no_header.gz", col_names = FALSE)
+BinDel::write_reference(c("sample2.bam"), "coordinates.tsv", "reference_no_header.gz", col_names = F, anonymise=F)
 ```
 Finally, to consolidate the reference files, they can be merged using the following command (in bash):
 
