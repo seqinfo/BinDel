@@ -33,18 +33,41 @@ bin_bam <- function(bam_location, bed) {
 #' @param bed A data frame in .bed format with columns: \emph{chr}, \emph{start}, \emph{end}, \emph{focus}.
 #' @return A data frame in bed format with GC%.
 find_gc <- function(bed) {
-  reads <- bed |>
-    dplyr::mutate(gc = Biostrings::letterFrequency(
-      Biostrings::getSeq(
-        BSgenome.Hsapiens.UCSC.hg38::BSgenome.Hsapiens.UCSC.hg38,
-        GenomicRanges::GRanges(chr, IRanges::IRanges(start = start, end = end))
-      ),
-      "GC",
-      as.prob = T
-    )) |>
-    dplyr::mutate(gc = round(gc, 1))
+  genome <- BSgenome.Hsapiens.UCSC.hg38::BSgenome.Hsapiens.UCSC.hg38
+  
+  # Initialize an empty list to store results
+  results <- list()
+  
+  # Fetch sequences and compute GC content per chromosome
+  for (chr_name in unique(bed$chr)) {
+    message(paste("Finding GC% for", chr_name))
+    # Subset bed data for the current chromosome
+    bed_chr <- bed[bed$chr == chr_name, ]
+    
+    # Create a GRanges object for the current chromosome
+    ranges <- GenomicRanges::GRanges(
+      seqnames = chr_name,
+      ranges = IRanges::IRanges(start = bed_chr$start, end = bed_chr$end)
+    )
+    
+    # Fetch sequences for the current chromosome
+    sequences <- Biostrings::getSeq(genome, ranges)
+    
+    # Compute GC content for the current chromosome
+    gc_content <- Biostrings::letterFrequency(sequences, "GC", as.prob = TRUE)
+    
+    # Add GC content to the current chunk of bed data frame
+    bed_chr <- dplyr::mutate(bed_chr, gc = round(gc_content, 1))
+    
+    # Store results for the current chromosome
+    results[[chr_name]] <- bed_chr
+  }
+  
+  # Combine results from all chromosomes into a single data frame
+  final_result <- dplyr::bind_rows(results)
+  
+  return(final_result)
 }
-
 
 #' Message current package name and version.
 #'
