@@ -2,7 +2,7 @@
 % Please edit documentation in R/stats.R
 \name{calculate_summary}
 \alias{calculate_summary}
-\title{Calculate summary statistics (probabilities)}
+\title{Calculate summary statistics including Mahalanobis distances.}
 \usage{
 calculate_summary(samples)
 }
@@ -13,15 +13,5 @@ calculate_summary(samples)
 A data frame with probabilities
 }
 \description{
-Aggregates bin statistics to region high probability risks. Requires columns
-\emph{PPDX}, \emph{PPDX_norm} and \emph{over_mean}.
-}
-\details{
-\enumerate{
-\item Sums sample \emph{PPDX}, \emph{PPDX_norm}, \emph{over_mean}.
-\item Calculates reference mean of \emph{PPDX} and \emph{PPDX_norm}.
-\item For each subregion (focus) calculates Mahalanobis distance from the
-reference group (\emph{PPDX}, \emph{PPDX_norm}) and transforms it with chi-square(df = 2)
-to -log10 probability.
-}
+Calculate summary statistics including Mahalanobis distances.
 }

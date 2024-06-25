@@ -1,6 +1,6 @@
 Package: BinDel
 Title: BinDel
-Version: 4.0.0
+Version: 5.0.0
 Authors@R: c(
   person(
     given = "Priit", 
@@ -19,7 +19,7 @@ License: CC BY-NC-SA 4.0
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 Depends:
     R (>= 4.1.1)
 biocViews:
@@ -30,7 +30,6 @@ Imports:
   dplyr (>= 1.0.7),
   GenomicAlignments (>= 1.30.0),
   GenomicRanges (>= 1.46.1),
-  ggplot2 (>= 3.3.5),
   IRanges (>= 2.28.0),
   purrr (>= 0.3.4),
   readr (>= 2.1.1),
@@ -38,5 +37,4 @@ Imports:
   stats (>= 4.1.1),
   stringr (>= 1.4.0),
   tidyr (>= 1.1.4),
-  utils (>= 4.1.1),
-  factoextra (>= 1.0.7)
+  utils (>= 4.1.1)

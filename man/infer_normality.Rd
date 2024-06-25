@@ -7,74 +7,37 @@
 infer_normality(
   bam_file_path,
   ref_file_path,
-  use_pca = TRUE,
-  use_pca_per_region = FALSE,
   cumulative_variance = 95,
-  cumulative_variance_per_region = 50,
-  num_comp = NULL,
-  num_comp_per_region = NULL,
-  create_bin_plot = FALSE,
-  save_bins = FALSE,
+  cumulative_variance_per_region = NULL,
   output_file_path = NULL,
-  internally_deidentify_reference = TRUE,
-  output_reference_scores = FALSE,
-  write_probabilities_dataframe = TRUE,
-  output_intermediate_scores = FALSE,
-  score_file_extension = ".scores",
-  bin_file_extension = ".bins"
+  bin_file_path = NULL
 )
 }
 \arguments{
-\item{bam_file_path}{A character string specifying the path to the BAM file containing the samples to be analyzed.}
+\item{bam_file_path}{character. The path to the BAM file to be processed.}
 
-\item{ref_file_path}{A character string specifying the path to the reference file.}
+\item{ref_file_path}{character. The path to the reference file in TSV format.}
 
-\item{use_pca}{A logical value indicating whether to use PCA-based normalization. If \code{TRUE}, PCA-based normalization will be used, otherwise not.}
+\item{cumulative_variance}{numeric, optional. The cumulative variance threshold (\%) for general PCA correction over all the genome. Default is 95 (\%).}
 
-\item{use_pca_per_region}{A logical value indicating whether to use PCA-based normalization per region.}
+\item{cumulative_variance_per_region}{numeric vector, optional. A vector of cumulative variance thresholds (\%) for PCA correction to apply per region. Default is NULL.}
 
-\item{cumulative_variance}{A numeric value specifying the cumulative percentage of variance to be retained by the number of PCA components in the normalization (based on the reference set). The default value is \code{95.0}.}
+\item{output_file_path}{character, optional. The path to the output file where results will be saved. If not provided, results will be returned as a data frame. Default is NULL.}
 
-\item{cumulative_variance_per_region}{A numeric value specifying the cumulative percentage of variance to be retained by the number of PCA components in the per region normalization. The default value is \code{50.0}.}
-
-\item{num_comp}{An integer specifying the number of PCA components to use for normalization. If \code{cumulative_variance} is not specified, this value will be used instead. The default value is \code{NULL}.}
-
-\item{num_comp_per_region}{An integer specifying the number of PCA components to use for normalization per region. If \code{cumulative_variance_per_region} is not specified, this value will be used instead. The default value is \code{NULL}.}
-
-\item{create_bin_plot}{A logical value indicating whether to create and save detailed bin plot. If \code{TRUE}, detailed bin plots will be created and saved, otherwise not. The default value is \code{FALSE}.}
-
-\item{save_bins}{A logical value indicating whether to save the bins. If \code{TRUE}, the bins will be saved to file, otherwise not. The default value is \code{FALSE}.}
-
-\item{output_file_path}{Set file name (path) for output.}
-
-\item{internally_deidentify_reference}{A logical value indicating whether to rename the reference samples to avoid naming conflicts with the analyzable samples during computations. If \code{TRUE}, reference samples will be internally renamed, otherwise not. The default value is \code{TRUE}}
-
-\item{output_reference_scores}{A logical value indicating whether to output the high-risk probabilities for the reference set during computations. If \code{TRUE}, the high-risk probabilities for the reference set will be outputted, otherwise not. The default value is \code{FALSE}}
-
-\item{write_probabilities_dataframe}{A logical value indicating whether to also write the high-risk probabilities to a file. If \code{TRUE}, the high-risk probabilities will be written to file. The default value is \code{TRUE}}
-
-\item{output_intermediate_scores}{A logical value indicating whether to output all intermediate scores used for calculating probabilities. If \code{TRUE}, all intermediate scores will be outputted, otherwise not. The default value is \code{FALSE}}
-
-\item{score_file_extension}{Specify the desired file extension for the output score file.}
-
-\item{bin_file_extension}{Specify the desired file extension for the output bin file.}
+\item{bin_file_path}{character, optional. The path to the file where bin data will be saved. Default is NULL.}
+}
+\value{
+If \code{output_file_path} is not provided, returns a data frame with the processed data. Otherwise, results are saved to the specified output file.
 }
 \description{
-Note: The function assumes that the reference set has already been processed and is available for use in the calculations.
-}
-\details{
-This function does the following:
-\enumerate{
-\item Apply bin-based GC\% correct.
-\item Normalizing by read count.
-\item Normalize by bin length.
-\item Apply PCA-based normalization
-\item Calculate reference group statistics per focus region.
-\item Calculate sample Mahalanobis distance from the reference group.
-\item Calculate \code{-log10} chi-squared distribution probabilities.
-}
+Infer sample high-risk probability based on a reference set.
 }
 \examples{
-infer_normality("sample.bam", "reference.gz")
-
+infer_sample_high_risk_probability(
+  bam_file_path = "sample.bam",
+  ref_file_path = "reference.tsv",
+  cumulative_variance = 95,
+  cumulative_variance_per_region = c(0, 10),
+  output_file_path = "output.tsv"
+)
 }

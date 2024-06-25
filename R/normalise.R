@@ -3,28 +3,31 @@
 # Contact: priit.palta@gmail.com
 
 
-#' Correct GC% bias in bins
+#' Apply GC% correction to samples.
 #'
-#' Sample wise, based on PMID: 28500333 and PMID: 20454671. Expects columns
-#' \emph{chr}, \emph{start}, \emph{end}, \emph{focus}, \emph{reads},
-#' \emph{samples}. Creates column \emph{gc_correct}.
-#' 
-#' @importFrom magrittr %>%
-#' @param samples A data frame to GC% correct.
-#' @return A GC% corrected data frame.
+#' This function applies GC% correction to the read counts in the given samples data frame.
+#' It assumes the presence of columns: \emph{chr}, \emph{start}, \emph{end}, \emph{focus}, \emph{reads}, and \emph{sample}.
+#'
+#' @param samples A data frame containing the required columns.
+#' @return A data frame with an added column \emph{gc_corrected}.
 gc_correct <- function(samples) {
   message("Applying GC% correct.")
+  
+  # Ensure required columns are present
+  required_cols <- c("chr", "start", "end", "focus", "reads", "sample", "reference")
+  if (!all(required_cols %in% colnames(samples))) {
+    stop("The samples data frame must contain the following columns: ", paste(required_cols, collapse = ", "))
+  }
+  
   return(
     samples %>% 
       dplyr::left_join(find_gc(
-        dplyr::select(.data = ., chr, start, end, focus) %>% 
-          dplyr::distinct(chr, start, end, focus)
-      )) %>% 
+        dplyr::distinct(.data = ., chr, start, end, focus))) %>% 
       # Do GC correct
-      dplyr::group_by(sample, gc) %>% 
+      dplyr::group_by(sample, gc, reference) %>% 
       dplyr::mutate(reads_gc_interval = mean(reads))%>% 
       dplyr::ungroup() %>% 
-      dplyr::group_by(sample) %>% 
+      dplyr::group_by(sample, reference) %>% 
       dplyr::mutate(gc_corrected = reads * mean(reads) / reads_gc_interval) %>% 
       dplyr::filter(!is.na(gc_corrected)) %>% 
       dplyr::ungroup()
@@ -41,7 +44,7 @@ normalize_reads <- function(samples) {
   return(
     samples |>
       # Sample read count correct
-      dplyr::group_by(sample) |>
+      dplyr::group_by(sample, reference) |>
       dplyr::mutate(gc_corrected = gc_corrected / sum(gc_corrected)) |>
       dplyr::ungroup() |>
       # Sample bin length correct
@@ -51,42 +54,25 @@ normalize_reads <- function(samples) {
 }
 
 
-#' PCA-normalize
+#' Perform PCA-based normalization on a normalized data frame.
 #'
-#' This function performs PCA-based normalization on a normalized data frame that has undergone previous normalization steps such as read count normalization and GC-correction.
+#' This function applies PCA-based normalization to a data frame that has undergone
+#' previous normalization steps such as read count normalization and GC-correction.
 #'
 #' @param samples A data frame resulting from the \code{\link{normalize_reads}} function.
-#' @param num_comp The number of PCA components to use in the normalization. If not specified, the function will use the cumulative variance to determine the number of components.
-#' @param cumulative_variance The percentage of cumulative variance to be explained by the number of PCA components. If not specified, the function will use the \code{num_comp} parameter to determine the number of components.
+#' @param cumulative_variance The cumulative variance threshold (%) to determine the number of PCA components.
 #' @return A normalized data frame.
-#' 
+#'
 #' @references
 #' This function is based on a \href{https://stats.stackexchange.com/questions/229092/how-to-reverse-pca-and-reconstruct-original-variables-from-several-principal-com}{StackExchange answer}.
-#' 
-#' @seealso
-#' \code{\link{normalize_reads}}, \code{\link{gc_correct}}
-#' 
-pca_correct <- function(samples, num_comp, cumulative_variance) {
-
-  if (!is.null(num_comp) & is.null(cumulative_variance)) {
-    message("Applying PCA normalization with ", num_comp, " components.")
-  } else if (is.null(num_comp) & !is.null(cumulative_variance)) {
-    message("Applying PCA normalization with cumulative variance of ", cumulative_variance,".")
-  } else if (!is.null(num_comp) & !is.null(cumulative_variance)) {
-    stop("num_comp and cumulative_variance cannot both be specified. Please choose one or the other.")
-  } else {
-    stop("Either num_comp or cumulative_variance must be specified.")
-  }
-  
-  # For PCA sort ()
+#'
+pca_correct <- function(samples, cumulative_variance) {
+  # Arrange samples by reference for consistency
   samples <- samples |>
     dplyr::arrange(reference)
   
   # Pivot wide for PCA normalization
-  message(head(samples %>%  dplyr::select(focus) %>% dplyr::distinct()))
-  
   wider <- samples |>
-    dplyr::select(focus, start, sample, reference, gc_corrected) |>
     tidyr::pivot_wider(
       names_from = c(focus, start),
       id_cols = c(sample, reference),
@@ -94,7 +80,7 @@ pca_correct <- function(samples, num_comp, cumulative_variance) {
       names_sep = ":"
     )
   
-  # Train PCA
+  # Extract reference data for PCA training
   ref <- wider |>
     dplyr::filter(reference) |>
     dplyr::select(-reference,-sample)
@@ -102,15 +88,26 @@ pca_correct <- function(samples, num_comp, cumulative_variance) {
   mu <- colMeans(ref, na.rm = T)
   
   refPca <- stats::prcomp(ref)
-
-  if(is.null(num_comp)){
-    num_comp <- (factoextra::get_eig(refPca) |> 
-                dplyr::mutate(PCA = dplyr::row_number()) |> 
-                dplyr::filter(cumulative.variance.percent >= cumulative_variance) |> 
-                dplyr::select(PCA))[1,1]
+  
+  # Determine the number of principal components required to reach the specified cumulative variance
+  # Calculate eigenvalues from the standard deviations of the principal components
+  eig_values <- refPca$sdev^2
+  # Calculate the cumulative variance percentage explained by each principal component
+  cumulative_variance_percent <- cumsum(eig_values / sum(eig_values)) * 100
+  
+  # Create a data frame with PCA component numbers and their cumulative variance percentages
+  num_comp <- data.frame(
+    PCA = seq_along(cumulative_variance_percent),  # PCA component numbers
+    cumulative.variance.percent = cumulative_variance_percent) |>  # Cumulative variance percentages
+    # Filter to retain rows where the cumulative variance percentage is greater than or equal to the specified threshold
+    dplyr::filter(cumulative.variance.percent >= cumulative_variance) |>
+    # Extract the PCA component numbers that meet the criteria
+    dplyr::pull(PCA) |>
+    # Select the first PCA component that meets the criteria
+    dplyr::first()
     
-    message("Setting PCA automatically to ", num_comp, " based on the target ", cumulative_variance, "% of cumulative variance calculated from the reference set.")
-  }
+  message("Using ", num_comp, " PCA components based on the target ", cumulative_variance, "% of cumulative variance calculated from the reference set.")
+  
   
   Xhat <- refPca$x[, 1:num_comp] %*% t(refPca$rotation[, 1:num_comp])
   Xhat <- scale(Xhat, center = -mu, scale = FALSE)
@@ -140,6 +137,7 @@ pca_correct <- function(samples, num_comp, cumulative_variance) {
   normalized$sample <- samples$sample
   normalized$reference <- samples$reference
   normalized$chr <- samples$chr
+  normalized$pcar <- cumulative_variance
   
   # Replace NAs with 0.
   normalized$gc_corrected[is.na(normalized$gc_corrected)] <- 0

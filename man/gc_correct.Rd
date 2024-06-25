@@ -2,18 +2,17 @@
 % Please edit documentation in R/normalise.R
 \name{gc_correct}
 \alias{gc_correct}
-\title{Correct GC\% bias in bins}
+\title{Apply GC\% correction to samples.}
 \usage{
 gc_correct(samples)
 }
 \arguments{
-\item{samples}{A data frame to GC\% correct.}
+\item{samples}{A data frame containing the required columns.}
 }
 \value{
-A GC\% corrected data frame.
+A data frame with an added column \emph{gc_corrected}.
 }
 \description{
-Sample wise, based on PMID: 28500333 and PMID: 20454671. Expects columns
-\emph{chr}, \emph{start}, \emph{end}, \emph{focus}, \emph{reads},
-\emph{samples}. Creates column \emph{gc_correct}.
+This function applies GC\% correction to the read counts in the given samples data frame.
+It assumes the presence of columns: \emph{chr}, \emph{start}, \emph{end}, \emph{focus}, \emph{reads}, and \emph{sample}.
 }

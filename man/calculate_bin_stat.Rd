@@ -2,32 +2,21 @@
 % Please edit documentation in R/stats.R
 \name{calculate_bin_stat}
 \alias{calculate_bin_stat}
-\title{Calculate bin statistics.}
+\title{Calculate bin statistics (microduplication and microdeletion risk bin stat).}
 \usage{
 calculate_bin_stat(samples)
 }
 \arguments{
-\item{samples}{A normalized data frame to be used in bin calculation.}
+\item{samples}{A normalized data frame containing the required columns.}
 }
 \value{
-A data frame that has added columns \emph{PPDX}, \emph{PPDX_norm}.
+A data frame with additional columns \emph{dup_score} and \emph{md_score}.
 }
 \description{
-Calculate each genomic bin statistics compared to the reference group. Can
-be only called right after normalization.
+Calculate statistics for each genomic bin compared to a reference group.
+This function should be called after normalization.
 }
 \details{
-Required columns \emph{chr}, \emph{start}, \emph{reference}, \emph{gc_corrected}.
-
-\enumerate{
-\item Calculates reference group each bin (by chromosome and start coordinate)
-mean and SD.
-\item Calculates regular Z-score for each sample (including reference sample) and
-if the bin is over the reference mean bin.
-\item Group by \emph{sample}, \emph{chr}, \emph{focus}, \emph{reference} and calculate
-\itemize{
-\item \eqn{PPDX = \frac{Z-score}{\sqrt{n}}}
-\item \eqn{PPDX_norm = \frac{PPDX + 1}{n_{bins_over_mean} + 2}} # Laplace smoothing
-}
-}
+Required columns in the input data frame are: \emph{chr}, \emph{start},
+\emph{reference}, \emph{gc_corrected}.
 }
