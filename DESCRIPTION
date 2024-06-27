@@ -1,6 +1,6 @@
 Package: BinDel
 Title: BinDel
-Version: 5.0.0
+Version: 5.0.1
 Authors@R: c(
   person(
     given = "Priit", 

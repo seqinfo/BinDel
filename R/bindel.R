@@ -87,9 +87,6 @@ infer_normality <- function(bam_file_path,
         normalized_samples <- do.call(rbind, sample_groups)
       }
       
-      # Add the current variance to the normalized samples
-      #normalized_samples$pcar <- pcar
-      
       # Append the normalized samples to the list
       all_normalized_samples[[length(all_normalized_samples) + 1]] <- normalized_samples
     }
@@ -113,8 +110,7 @@ infer_normality <- function(bam_file_path,
   message("Calculating risk scores")
   samples <- calculate_summary(samples) |> 
     dplyr::filter(!reference) |>
-    dplyr::select(-reference) |>
-    dplyr::mutate_if(is.numeric, function(x) format(x, scientific = FALSE))
+    dplyr::select(-reference)
   
 
   end.time <- Sys.time()
