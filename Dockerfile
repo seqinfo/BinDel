@@ -14,6 +14,7 @@ RUN  apt-get update \
     r-cran-purrr \
     r-cran-readr \
     r-bioc-rsamtools \
+    r-cran-tidyr \
     git \
     r-bioc-bsgenome \
   && R -e 'options(timeout = 15000);if (!require("BiocManager", quietly = TRUE)) install.packages("BiocManager");BiocManager::install("BSgenome.Hsapiens.UCSC.hg38", update=F);devtools::install_github("seqinfo/BinDel", upgrade = "never")' \

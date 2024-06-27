@@ -39,7 +39,7 @@ sudo apt install --no-install-recommends r-base
 ```
 #### Install BinDel dependencies and [devtools](https://www.r-project.org/nosvn/pandoc/devtools.html)
 ```bash
-sudo apt -y install r-cran-devtools r-bioc-biostrings r-cran-dplyr r-bioc-genomicalignments r-bioc-genomicranges r-cran-ggplot2  r-bioc-iranges r-cran-magrittr r-cran-purrr r-cran-readr r-bioc-rsamtools git r-bioc-bsgenome libxt-dev
+sudo apt -y install r-cran-devtools r-bioc-biostrings r-cran-dplyr r-bioc-genomicalignments r-bioc-genomicranges r-cran-ggplot2  r-bioc-iranges r-cran-magrittr r-cran-purrr r-cran-readr r-cran-tidyr r-bioc-rsamtools git r-bioc-bsgenome libxt-dev
 ```
 #### Install BSgenome.Hsapiens.UCSC.hg38 and BinDel
 ```R
